@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestion d'école — NX-428</title>
+
+  <!-- Bootstrap 5 CSS (CDN) -->
+  <link href="bootstrap.min.css" rel="stylesheet">
+
+  <!-- Police moderne (system + fallback) -->
+  <style>
+    /* ---------------------------------
+       Styles globaux & tendance design
+       - Big typography (titre XXL)
+       - Palette: blanc + bleu
+       - Cartes arrondies, ombre douce, espace aérien
+       - Layout responsive via Bootstrap grid
+       - Commentaires clairs pour integration JS future
+       --------------------------------- */
+
+    :root{
+      --blue-500: #2563eb;
+      --blue-600: #1e40af;
+      --muted: #64748b;
+      --card-radius: 14px;
+      --glass: rgba(255,255,255,0.6);
+    }
+
+    html,body{
+      height:100%;
+      background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+      color: #0f172a;
+      -webkit-font-smoothing:antialiased;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    /* Hero / header */
+    .hero{
+      padding: 3.5rem 1rem 2rem;
+    }
+    .hero .title{
+      font-weight: 800;
+      font-size: clamp(2.25rem, 4vw, 3.5rem); /* big typography */
+      line-height: 1.02;
+      color: var(--blue-600);
+      letter-spacing: -0.02em;
+    }
+    .hero .lead{
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin-top: .5rem;
+    }
+
+    /* Cards */
+    .card-ui{
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 30px rgba(16,24,40,0.06);
+      border: 1px solid rgba(37,99,235,0.06);
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.9));
+    }
+
+    /* Form inputs override for nicer padding */
+    .form-control, .form-select{
+      border-radius: 10px;
+      padding: .7rem .85rem;
+      border: 1px solid rgba(15,23,42,0.08);
+    }
+
+    /* Primary button strong */
+    .btn-primary{
+      background: var(--blue-500);
+      border-color: var(--blue-500);
+      font-weight: 700;
+      padding: .65rem 1rem;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+    }
+    .btn-primary:hover{ background: var(--blue-600); border-color: var(--blue-600); }
+
+    /* Salle (section en évidence) */
+    .salle-panel{
+      background: linear-gradient(180deg, rgba(37,99,235,0.04), rgba(37,99,235,0.02));
+      border-left: 4px solid var(--blue-500);
+      padding: 1rem;
+      border-radius: 10px;
+    }
+
+    /* Table styles épurés */
+    .table thead th{
+      background: var(--blue-500);
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      vertical-align: middle;
+    }
+    .table tbody td{
+      vertical-align: middle;
+      border-top: 1px solid rgba(15,23,42,0.04);
+    }
+
+    /* Stat badges */
+    .stat-badge{
+      display:inline-block;
+      padding:.45rem .7rem;
+      border-radius:999px;
+      background: rgba(37,99,235,0.1);
+      color: var(--blue-600);
+      font-weight:700;
+      margin-right:.5rem;
+    }
+
+    /* Petit responsive tweaks */
+    @media (max-width:767px){
+      .hero{ padding-top:2rem }
+      .hero .lead{ font-size: .98rem }
+    }
+
+    /* ----- COMMENTAIRES (ne pas supprimer) -----
+       - Ce fichier contient uniquement HTML + CSS (Bootstrap).
+       - Les éléments dynamiques (listes, dropdowns, tableau) sont prévus pour
+         être alimentés par JS. Voir les attributs data-* et id utiles
+         :
+         * #selectEtudiant -> <select> pour les étudiants
+         * #listeEtudiants -> <ul> de la salle
+         * #tableEtudiants tbody -> remplissage du tableau
+         * #profSalle -> où afficher le professeur assigné
+         * #nbEtudiants / #nbProfs -> compteurs statiques
+       - Ajoute ton JS externe ou interne plus tard pour interagir avec ces IDs.
+       - Si tu veux que je fournisse le JS ensuite, dis-le moi (ou indique
+         les contraintes : vanilla JS ES6 ou framework X).
+       --------------------------------------------- */
+  </style>
+</head>
+<body>
+
+  <div class="container-lg">
+    <!-- HERO: Grand titre avec big typography (trend) -->
+    <header class="hero text-center mb-4">
+      <h1 class="title">Gestion d'école : NX-428</h1>
+      <p class="lead">Testez vos compétences en gestion d’école avec notre démo interactive !</p>
+    </header>
+
+    <!-- GRID: 2 cols desktop / 1 col mobile -->
+    <section class="row g-4">
+
+      <!-- Column gauche: Formulaires (students / profs / notes) -->
+      <div class="col-lg-6">
+
+        <!-- Card: Gestion étudiants -->
+        <div class="card card-ui mb-3 p-4">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <h2 class="h5 mb-1">👩‍🎓 Gestion des étudiants</h2>
+              <small class="text-muted">Formulaire d'ajout — stocker via classe Etudiant côté JS</small>
+            </div>
+            <div class="text-end">
+              <span class="stat-badge" id="nbEtudiants">0</span>
+              <small class="d-block text-muted">Étudiants</small>
+            </div>
+          </div>
+
+          <!-- FORMULAIRE: ATTENTION -> Ce formulaire est statique (HTML/CSS).
+               Les attributs id et name sont prêts pour être capturés par JS. -->
+          <form id="formEtudiant" class="mt-3">
+            <div class="mb-2">
+              <label for="nom" class="form-label small fw-semibold">Nom</label>
+              <input id="nom" name="nom" class="form-control" type="text" placeholder="Ex: RAKOTONDRASOA" required>
+            </div>
+            <!-- Sélection de classe -->
+             <div class="mb-2">
+              <label for="selectClass" class="form-label small fw-semibold">Classe</label>
+              <select name="selectClass" id="selectClass">
+                <!-- option de salle ici-->
+                </select>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <label for="age" class="form-label small fw-semibold">Âge</label>
+                <input id="age" name="age" class="form-control" type="number" min="1" placeholder="20" required>
+              </div>
+              <div class="col-6">
+                <label for="niveau" class="form-label small fw-semibold">Niveau</label>
+                <input id="niveau" name="niveau" class="form-control" type="text" placeholder="Ex: L1" required>
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class=" etudiantSub btn btn-primary">Ajouter étudiant</button>
+            </div>
+
+            <!-- NOTE: Après ajout via JS, mettre à jour:
+                 - #listeEtudiants (ul)
+                 - #selectEtudiant (select)
+                 - #tableEtudiants tbody
+            -->
+          </form>
+        </div>
+
+        <!-- Card: Gestion classes -->
+        <div class="card card-ui mb-3 p-4">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <h2 class="h5 mb-1">🏫 Gestion des Classes</h2>
+              <small class="text-muted">Ajouter une nouvelle salle</small>
+            </div>
+            <div class="text-end">
+              <span class="stat-badge" id="nbClasse">0</span>
+              <small class="d-block text-muted">Classes</small>
+            </div>
+          </div>
+
+          <form id="formClasse" class="mt-3">
+            <div class="mb-2">
+              <label for="nomClasse" class="form-label small fw-semibold">Nom</label>
+              <input id="nomClasse" name="nomClasse" class="form-control" type="text" placeholder="Ex: TERMINALE S" required>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Ajouter une Salle</button>
+            </div>
+          </form>
+        </div>
+        
+                <!-- Card: Gestion professeurs -->
+        <div class="card card-ui mb-3 p-4">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <h2 class="h5 mb-1">👨‍🏫 Gestion des professeurs</h2>
+              <small class="text-muted">Affecter un professeur à la salle</small>
+            </div>
+            <div class="text-end">
+              <span class="stat-badge" id="nbProfs">0</span>
+              <small class="d-block text-muted">Profs</small>
+            </div>
+          </div>
+
+          <form id="formProf" class="mt-3">
+            <div class="mb-2">
+              <label for="nomProf" class="form-label small fw-semibold">Nom</label>
+              <input id="nomProf" name="nomProf" class="form-control" type="text" required>
+            </div>
+            <!-- Sélection de classe -->
+             <div class="mb-2">
+              <label for="selectProfClass" class="form-label small fw-semibold">Classe</label>
+              <select name="selectProfClass" id="selectProfClass">
+                <option value="Iggl">IGGL</option></option>
+                </select>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <label for="ageProf" class="form-label small fw-semibold">Âge</label>
+                <input id="ageProf" name="ageProf" class="form-control" type="number" min="18" required>
+              </div>
+              <div class="col-6">
+                <label for="matiere" class="form-label small fw-semibold">Matière</label>
+                <input id="matiere" name="matiere" class="form-control" type="text" required>
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Affecter professeur à la salle</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Card: Gestion des notes -->
+        <div class="card card-ui p-4">
+          <h2 class="h6 mb-2">📝 Noter un étudiant</h2>
+          <small class="text-muted">Choisir un étudiant puis ajouter une note</small>
+
+          <!-- Le <select> est vide par défaut; JS devra l'alimenter -->
+          <form id="formNote" class="row g-2 align-items-end mt-3">
+            <div class="col-8">
+              <label for="selectEtudiant" class="form-label small fw-semibold">Étudiant</label>
+              <select id="selectEtudiant" class="form-select" aria-label="Sélection étudiant">
+                <!--Liste d'étudiants Ici-->
+              </select>
+            </div>
+            <div class="col-4">
+              <label for="note" class="form-label small fw-semibold">Note</label>
+              <input id="note" name="note" class="form-control" type="number" min="0" max="100">
+            </div>
+
+            <div class="col-12 d-grid mt-2">
+              <button type="submit" class="btn btn-primary">Ajouter note</button>
+            </div>
+          </form>
+        </div>
+
+      </div> <!-- /col-lg-6 -->
+
+      <!-- Column droite: Salle + tableau + stats -->
+      <div class="col-lg-6 classCardContainer">
+        <!--DES CARDS DE SALLE ICI-->
+      </div> <!-- /col-lg-6 -->
+    </section>
+            <!-- Card: Notes & explications -->
+<div class="card card-ui p-4 mb-3">
+  <h5 class="mb-2">Bienvenue sur la démo — Version 1.0</h5>
+  <ul class="small text-muted">
+    <li>💡 Certaines fonctionnalités sont encore en cours de développement (ex : statistiques globales).</li>
+    <li>📝 Les formulaires vous permettent d’ajouter des étudiants, des professeurs et des salles facilement.</li>
+    <li>🎯 Les notes ajoutées sont automatiquement prises en compte et la moyenne se met à jour dynamiquement.</li>
+    <li>👩‍🏫 Le projet a été conçu pour apprendre la <strong>POO en JavaScript</strong> et un peu de <strong>Bootstrap</strong>.</li>
+    <li>✨ Toutes les actions sont visibles en temps réel dans la liste, le tableau et les sélecteurs de notation.</li>
+    <li>⚠️ Les chiffres affichés (statistiques globales) sont indicatifs et seront améliorés dans les prochaines versions.</li>
+  </ul>
+
+  <hr>
+  <p class="small text-muted mb-0">
+    N’hésitez pas à tester toutes les fonctionnalités : ajouter des étudiants, assigner un professeur, donner des notes, et observer la mise à jour automatique des tableaux et listes.  
+    Cette version est interactive et pédagogique — parfait pour apprendre la POO et le DOM !
+  </p>
+</div>
+
+
+    <!-- Footer court -->
+    <footer class="text-center text-muted mt-4 mb-5 small">
+      Prototype UI/UX• Bootstrap 5 • HTML/CSS/JS
+    </footer>
+  </div>
+
+  <!-- IMPORTANT: Pas de JS inclus ici (conformément à ta demande).
+       Lorsque tu voudras le JS, je fournirai un script vanilla ES6 qui :
+       - instanciera Etudiant/Professeur/Salle
+       - manipulera les IDs ci-dessus
+       - mettra à jour le DOM en temps réel
+  -->
+  <script src="script.js"></script>
+<script src="bootstrap.min.js"></script>
+</body>
+</html>
