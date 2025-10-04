@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gestion d'école — NX-428</title>
 
-  <!-- Bootstrap 5 CSS (CDN) -->
   <link href="bootstrap.min.css" rel="stylesheet">
-
-  <!-- Police moderne (system + fallback) -->
   <style>
     /* ---------------------------------
        Styles globaux & tendance design
@@ -117,20 +114,6 @@
       .hero .lead{ font-size: .98rem }
     }
 
-    /* ----- COMMENTAIRES (ne pas supprimer) -----
-       - Ce fichier contient uniquement HTML + CSS (Bootstrap).
-       - Les éléments dynamiques (listes, dropdowns, tableau) sont prévus pour
-         être alimentés par JS. Voir les attributs data-* et id utiles
-         :
-         * #selectEtudiant -> <select> pour les étudiants
-         * #listeEtudiants -> <ul> de la salle
-         * #tableEtudiants tbody -> remplissage du tableau
-         * #profSalle -> où afficher le professeur assigné
-         * #nbEtudiants / #nbProfs -> compteurs statiques
-       - Ajoute ton JS externe ou interne plus tard pour interagir avec ces IDs.
-       - Si tu veux que je fournisse le JS ensuite, dis-le moi (ou indique
-         les contraintes : vanilla JS ES6 ou framework X).
-       --------------------------------------------- */
   </style>
 </head>
 <body>
@@ -171,7 +154,7 @@
             <!-- Sélection de classe -->
              <div class="mb-2">
               <label for="selectClass" class="form-label small fw-semibold">Classe</label>
-              <select name="selectClass" id="selectClass">
+              <select name="selectClass" id="selectClass" class="form-select" aria-labe>
                 <!-- option de salle ici-->
                 </select>
             </div>
@@ -244,7 +227,7 @@
             <!-- Sélection de classe -->
              <div class="mb-2">
               <label for="selectProfClass" class="form-label small fw-semibold">Classe</label>
-              <select name="selectProfClass" id="selectProfClass">
+              <select name="selectProfClass" id="selectProfClass" class="form-select" aria-labe>
                 <option value="Iggl">IGGL</option></option>
                 </select>
             </div>
@@ -316,18 +299,11 @@
 </div>
 
 
-    <!-- Footer court -->
+    <!-- Footer -->
     <footer class="text-center text-muted mt-4 mb-5 small">
       Prototype UI/UX• Bootstrap 5 • HTML/CSS/JS
     </footer>
   </div>
-
-  <!-- IMPORTANT: Pas de JS inclus ici (conformément à ta demande).
-       Lorsque tu voudras le JS, je fournirai un script vanilla ES6 qui :
-       - instanciera Etudiant/Professeur/Salle
-       - manipulera les IDs ci-dessus
-       - mettra à jour le DOM en temps réel
-  -->
   <script src="script.js"></script>
 <script src="bootstrap.min.js"></script>
 </body>
